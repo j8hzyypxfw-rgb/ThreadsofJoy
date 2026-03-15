@@ -232,7 +232,7 @@ export default function Home() {
       </Head>
 
       {/* ══ HERO ══════════════════════════════════════════════════ */}
-      <header style={{ background:'#1a0a2e', position:'relative', overflow:'hidden' }}>
+      <header style={{ background:'#1a0a2e', position:'relative' }}>
         <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 15% 60%, rgba(180,100,220,0.18) 0%,transparent 55%), radial-gradient(ellipse at 85% 30%, rgba(201,169,110,0.12) 0%,transparent 50%)' }} />
 
         {/* User switcher */}
@@ -271,13 +271,14 @@ export default function Home() {
         </div>
 
         {/* Partner strip */}
-        <div style={{ borderTop:'1px solid rgba(255,255,255,0.06)', padding:'8px 24px 14px', display:'flex', gap:8, justifyContent:'center', flexWrap:'wrap', position:'relative', zIndex:2 }}>
-          {SOURCES.map(s => <span key={s} style={{ background:'rgba(255,255,255,0.05)', border:'0.5px solid rgba(255,255,255,0.1)', borderRadius:20, padding:'3px 11px', fontSize:10, color:'#a080c0', letterSpacing:'0.08em' }}>{s}</span>)}
+        <div style={{ borderTop:'1px solid rgba(255,255,255,0.06)', padding:'8px 24px 14px', display:'flex', gap:8, justifyContent:'center', flexWrap:'wrap', alignItems:'center', position:'relative', zIndex:2 }}>
+          <span style={{ fontSize:9, letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(255,255,255,0.25)', marginRight:4 }}>Design sources</span>
+          {SOURCES.map(s => <span key={s} style={{ background:'transparent', border:'none', fontSize:10, color:'rgba(160,128,192,0.7)', letterSpacing:'0.06em' }}>{s}</span>)}
         </div>
       </header>
 
       {/* ══ NAV ══════════════════════════════════════════════════ */}
-      <nav style={{ background:'#fff', borderBottom:'1px solid #e5e7eb', display:'flex', padding:'0 16px', overflowX:'auto', position:'sticky', top:0, zIndex:10, boxShadow:'0 1px 4px rgba(0,0,0,0.05)' }}>
+      <nav style={{ background:'#ffffff', borderBottom:'2px solid #e5e7eb', display:'flex', padding:'0 16px', overflowX:'auto', position:'sticky', top:0, zIndex:100, boxShadow:'0 2px 8px rgba(0,0,0,0.08)' }}>
         {navTabs.map(n => (
           <button key={n.id} onClick={() => setTab(n.id)} style={{ padding:'12px 18px', border:'none', background:'transparent', fontSize:13, color: tab===n.id ? '#7c3aed' : '#6b7280', borderBottom: tab===n.id ? '2px solid #7c3aed' : '2px solid transparent', fontWeight: tab===n.id ? 700 : 400, cursor:'pointer', whiteSpace:'nowrap', fontFamily:'Georgia,serif', transition:'all 0.15s' }}>
             {n.label}
