@@ -55,6 +55,7 @@ export default function Home() {
   const [favLoading, setFavLoading] = useState(false)
   const [savingFav, setSavingFav] = useState(false)
   const [savedMsg, setSavedMsg] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   // ── Catalog / upload ────────────────────────────────────────────
   const [catStyle, setCatStyle] = useState('')
@@ -118,16 +119,29 @@ export default function Home() {
   const handleSaveFavorite = async () => {
     if (!generatedSVG || !designParams) return
     setSavingFav(true)
+    setSaveError('')
     try {
-      await fetch('/api/favorites', {
+      const res = await fetch('/api/favorites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user: activeUser, design: designParams }),
       })
-      await fetchFavorites()
-      setSavedMsg(true)
-      setTimeout(() => setSavedMsg(false), 2500)
-    } catch (e) { console.error(e) }
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        const msg = data.blobMissing
+          ? 'Blob storage not connected. Go to Vercel → Storage → Create Blob → Connect to project → Redeploy.'
+          : data.packageMissing
+          ? 'Missing package. Run: npm install @vercel/blob then redeploy.'
+          : (data.error || 'Save failed')
+        setSaveError(msg)
+      } else {
+        await fetchFavorites()
+        setSavedMsg(true)
+        setTimeout(() => setSavedMsg(false), 2500)
+      }
+    } catch (e) {
+      setSaveError('Network error: ' + e.message)
+    }
     setSavingFav(false)
   }
 
@@ -675,6 +689,11 @@ export default function Home() {
                     </button>
                     <button style={S.btnSec} onClick={() => setTab('design')}>Edit Design</button>
                   </div>
+                  {saveError && (
+                    <div style={{ marginTop:10, background:'#fef2f2', border:'1px solid #fecaca', borderRadius:6, padding:'10px 14px', fontSize:12, color:'#dc2626' }}>
+                      ⚠️ {saveError}
+                    </div>
+                  )}
                 </>
               ) : (
                 <div style={{ textAlign:'center', padding:'48px 24px', color:'#9ca3af' }}>
