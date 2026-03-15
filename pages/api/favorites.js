@@ -1,29 +1,23 @@
 // pages/api/favorites.js
-// Shared favorites store using Vercel Blob
-// All three users (Julie, Mom, Kim) share one favorites list — everyone sees everyone's saves
+// Shared favorites using Vercel Blob
+// Julie, Mom, and Kim all share one favorites list
 
-import { put, list, del } from '@vercel/blob'
-
-const BLOB_KEY = 'threads-of-joy/favorites.json'
+import { put, list } from '@vercel/blob'
 
 async function readFavorites() {
   try {
-    const { blobs } = await list({ prefix: 'threads-of-joy/favorites' })
+    const { blobs } = await list({ prefix: 'toj-favorites' })
     if (!blobs || blobs.length === 0) return []
-    // Get the most recent blob
     const sorted = blobs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt))
-    const resp = await fetch(sorted[0].url)
-    if (!resp.ok) return []
-    return await resp.json()
-  } catch {
-    return []
-  }
+    const res = await fetch(sorted[0].url)
+    if (!res.ok) return []
+    return await res.json()
+  } catch { return [] }
 }
 
 async function writeFavorites(favorites) {
-  const json = JSON.stringify(favorites, null, 2)
-  const blob = new Blob([json], { type: 'application/json' })
-  await put(BLOB_KEY, blob, { access: 'public', addRandomSuffix: false })
+  const blob = new Blob([JSON.stringify(favorites)], { type: 'application/json' })
+  await put('toj-favorites.json', blob, { access: 'public', addRandomSuffix: false })
 }
 
 export default async function handler(req, res) {
@@ -38,22 +32,12 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { user, design } = req.body
+    const { user, design } = req.body || {}
     if (!user || !design) return res.status(400).json({ error: 'user and design required' })
-
     const favorites = await readFavorites()
-    const id = `fav_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
-    const newFav = {
-      id,
-      user,
-      design,
-      savedAt: new Date().toISOString(),
-    }
-    favorites.unshift(newFav) // newest first
-
-    // Keep max 200 favorites
+    const newFav = { id: `fav_${Date.now()}`, user, design, savedAt: new Date().toISOString() }
+    favorites.unshift(newFav)
     if (favorites.length > 200) favorites.splice(200)
-
     await writeFavorites(favorites)
     return res.status(200).json({ success: true, favorite: newFav })
   }
@@ -61,10 +45,8 @@ export default async function handler(req, res) {
   if (req.method === 'DELETE') {
     const { id } = req.query
     if (!id) return res.status(400).json({ error: 'id required' })
-
     const favorites = await readFavorites()
-    const filtered = favorites.filter(f => f.id !== id)
-    await writeFavorites(filtered)
+    await writeFavorites(favorites.filter(f => f.id !== id))
     return res.status(200).json({ success: true })
   }
 
